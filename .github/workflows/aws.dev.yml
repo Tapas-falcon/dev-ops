@@ -34,8 +34,31 @@ jobs:
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.AWS_DEV_SSH_KEY }}
-          
-      - name: Copy docker-compose.yml to EC2
+
+      - name: Copy docker-compose.yml to multiple directories on EC2
         run: |
-          scp -o StrictHostKeyChecking=no docker-compose.yml ${{secrets.AWS_DEV_USERNAME}}@${{secrets.AWS_DEV_DNS}}:/home/${{secrets.AWS_DEV_USERNAME}}/dev-ops/test/
+          # 定义拷贝函数
+          copy_to_dir() {
+            local TARGET_DIR="$1"
+            echo "📦 Copying docker-compose.yml to $TARGET_DIR"
+
+            scp -o StrictHostKeyChecking=no \
+              docker-compose.yml \
+              ${{ secrets.AWS_DEV_USERNAME }}@${{ secrets.AWS_DEV_DNS }}:"$TARGET_DIR"
+          }
+
+          # 要拷贝的目标路径列表
+          TARGET_DIRS=(
+            "/home/${{ secrets.AWS_DEV_USERNAME }}/dev-ops/test"
+            "/home/${{ secrets.AWS_DEV_USERNAME }}/dev-ops/test2"
+          )
+
+          # 循环执行拷贝
+          for dir in "${TARGET_DIRS[@]}"; do
+            if [ -n "$dir" ]; then
+              copy_to_dir "$dir"
+            else
+              echo "⚠️ Skipping empty directory"
+            fi
+          done
 
