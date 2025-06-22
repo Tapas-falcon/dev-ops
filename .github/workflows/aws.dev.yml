@@ -37,5 +37,5 @@ jobs:
           
       - name: Copy docker-compose.yml to EC2
         run: |
-          scp -o StrictHostKeyChecking=no docker-compose.yml ${{secrets.AWS_DEV_USERNAME}}@${{secrets.AWS_DEV_DNS}}:/home/${{secrets.AWS_DEV_USERNAME}}/dev-ops/
+          scp -o StrictHostKeyChecking=no docker-compose.yml ${{secrets.AWS_DEV_USERNAME}}@${{secrets.AWS_DEV_DNS}}:/home/${{secrets.AWS_DEV_USERNAME}}/dev-ops/test/
 
