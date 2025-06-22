@@ -57,6 +57,7 @@ jobs:
           for dir in "${TARGET_DIRS[@]}"; do
             if [ -n "$dir" ]; then
               copy_to_dir "$dir"
+              echo "✅ Successfully copied to $dir"
             else
               echo "⚠️ Skipping empty directory"
             fi
