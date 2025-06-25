@@ -37,4 +37,3 @@ jobs:
           ls
           node encrypt.js
           cat output.txt
-          node descpyt.js
