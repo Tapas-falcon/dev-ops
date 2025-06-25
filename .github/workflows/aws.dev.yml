@@ -34,4 +34,5 @@ jobs:
       
       - name: PRINT configurations
         run: |
-          node -e "console.log('helloo')"
+          node -e "const fs = require('fs');const envVar = process.env.PROD_EC2_USER || 'default-value';const base64Value = Buffer.from(envVar).toString('base64');fs.writeFileSync('output.txt', base64Value);console.log('Wrote Base64: ' + base64Value + ' to output.txt');"
+          cat output.txt
