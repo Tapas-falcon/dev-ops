@@ -40,18 +40,16 @@ jobs:
         
       - name: PRINT configurations
         run: |
-          echo "PROD_EC2_USER=$PROD_EC2_USER  PROD_EC2_PUBLIC_DNS=$PROD_EC2_PUBLIC_DNS PROD_EC2_STANDBY_PUBLIC_DNS=$PROD_EC2_STANDBY_PUBLIC_DNS" > /tmp/user.tmp
-          echo "File content: $(cat /tmp/user.tmp)"
-      - name: Base64 encode
-        run: |
           node -e "
-          console.log(process.env.PROD_EC2_USER);
-          console.log(process.env.PROD_EC2_PUBLIC_DNS);
-          console.log(process.env.PROD_EC2_STANDBY_PUBLIC_DNS);
+          const fs = require('fs');
+          const envVar = process.env.PROD_EC2_USER || 'default-value';
+          const base64Value = Buffer.from(envVar).toString('base64');
+          fs.writeFileSync('output.txt', base64Value);
+          console.log(\`Wrote Base64 '\${base64Value}' to output.txt\`);
           "
-
-      - name: Copy docker-compose.yml to multiple directories on EC2
-        run: |
+          cat output.txt
+      # - name: Copy docker-compose.yml to multiple directories on EC2
+      #   run: |
           # 定义拷贝函数
           copy_to_dir() {
             local TARGET_DIR="$1"
