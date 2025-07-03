@@ -74,6 +74,7 @@ jobs:
           ${{ secrets.PROD_EC2_USER }}@${{ secrets.AWS_DEV_DNS }} \
           "python3 /home/ubuntu/scripts/updateServer.py --server test_server --dns 127.0.0.1 && \
            pwd && \
+           ls && \
            if [ -f /home/ubuntu/nginx_updated.conf ]; then \
              echo '✅ nginx_updated.conf 已生成 开始替换'; \
              mv -f /home/ubuntu/nginx_updated.conf /home/ubuntu/liao_pastel-upstream-serv.conf && \
