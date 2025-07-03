@@ -1,0 +1,31 @@
+name: Production Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch: 
+        description: 'Branch to build'
+        required: true
+        default: 'master'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+     PROD_EC2_USER: ${{ secrets.PROD_EC2_USER }}
+     PROD_EC2_PUBLIC_DNS: ${{ secrets.PROD_EC2_PUBLIC_DNS }}
+     PROD_EC2_STANDBY_PUBLIC_DNS: ${{ secrets.PROD_EC2_STANDBY_PUBLIC_DNS }}
+     IMAGE_TAG: ${{ github.sha }}
+     ACTIONS_STEP_DEBUG: true
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch || 'master' }}
+
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.AWS_LIAO_EC2_SSH_KEY }}
+
