@@ -58,6 +58,21 @@ jobs:
           else
             echo "❌ 错误：upstream IP 不合法，必须是 localhost 或 18.101.190.34，当前为：$UPSTREAM_IP"
             exit 1
-          fi
-          
+          fi    
+
+      - name: Deploy application into server
+        run: |
+          echo "这是部署应用到对应的server上"
+
+      - name: Run basic testing to make sure everything is working well
+        run: |
+          echo "这是运行测试，确保一切正常"
+
+      - name: Update stream settings and reload nginx
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+          ${{ secrets.PROD_EC2_USER }}@${{ secrets.AWS_DEV_DNS }} \
+          "python3 /home/ubuntu/scripts/updateServer.py --server test_server --dns 127.0.0.1"
+
+
     
