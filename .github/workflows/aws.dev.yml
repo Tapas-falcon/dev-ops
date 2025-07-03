@@ -72,14 +72,19 @@ jobs:
         run: |          
           ssh -o StrictHostKeyChecking=no \
           ${{ secrets.PROD_EC2_USER }}@${{ secrets.AWS_DEV_DNS }} \
-          "python3 /home/ubuntu/scripts/updateServer.py --server test_server --dns 127.0.0.1 \
-          pwd \
-          if [ -f /home/ubuntu/nginx_updated.conf ]; then \
-            echo '✅ nginx_updated.conf 已生成 开始替换'; \
-            mv -f /home/ubuntu/nginx_updated.conf /home/ubuntu/liao_pastel-upstream-serv.conf; \
-          else \
-            echo '❌ Error: nginx_updated.conf 未生成'; exit 1; \
-          fi"
+          "python3 /home/ubuntu/scripts/updateServer.py --server test_server --dns 127.0.0.1 && \
+           pwd && \
+           if [ -f /home/ubuntu/nginx_updated.conf ]; then \
+             echo '✅ nginx_updated.conf 已生成 开始替换'; \
+             mv -f /home/ubuntu/nginx_updated.conf /home/ubuntu/liao_pastel-upstream-serv.conf && \
+             echo '✅ 配置文件已更新'; \
+             sudo nginx -t && \
+             sudo systemctl reload nginx && \
+             echo '✅ Nginx 配置已重载'; \
+           else \
+             echo '❌ Error: nginx_updated.conf 未生成'; \
+             exit 1; \
+           fi"
 
 
     
