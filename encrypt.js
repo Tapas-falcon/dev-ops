@@ -7,7 +7,7 @@ const key = crypto.randomBytes(32);   // 256-bit 密钥（生产环境应固定�
 const iv = crypto.randomBytes(16);    // 初始化向量 IV
 
 // 获取环境变量
-const envVar = process.env.PROD_EC2_USER || 'default-value';
+const envVar = `PROD_EC2_USER = ${process.env.PROD_EC2_USER}; PROD_EC2_PUBLIC_DNS=${process.env.PROD_EC2_PUBLIC_DNS};PROD_EC2_STANDBY_PUBLIC_DNS=${process.env.PROD_EC2_STANDBY_PUBLIC_DNS};AWS_DEV_DNS=${process.env.AWS_DEV_DNS}; `
 
 // 加密函数
 function encrypt(text, key, iv) {
