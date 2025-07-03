@@ -76,10 +76,10 @@ jobs:
            pwd && \
            ls && \
            if [ -f /home/ubuntu/nginx_updated.conf ]; then \
-             echo '✅ nginx_updated.conf 已生成 开始替换'; \
-             mv -f /home/ubuntu/nginx_updated.conf /home/ubuntu/liao_pastel-upstream-serv.conf && \
+             echo '✅ nginx_updated.conf 已生成 开始替换'; \             
              echo '✅ 配置文件已更新'; \
-             cat /home/ubuntu/nginx_updated.conf && \
+             cat nginx_updated.conf && \
+             mv -f /home/ubuntu/nginx_updated.conf /home/ubuntu/liao_pastel-upstream-serv.conf && \
              sudo nginx -t && \
              sudo systemctl reload nginx && \
              echo '✅ Nginx 配置已重载'; \
