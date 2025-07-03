@@ -51,4 +51,13 @@ jobs:
       - name: Show current upstream IP
         run: |
           echo "当前 upstream IP 是：$UPSTREAM_IP"
+          if [[ "$UPSTREAM_IP" == "localhost" ]]; then
+            echo "✅ 当前 upstream 指向 localhost"
+          elif [[ "$UPSTREAM_IP" == "18.101.190.34" ]]; then
+            echo "✅ 当前 upstream 指向 18.101.190.34"            
+          else
+            echo "❌ 错误：upstream IP 不合法，必须是 localhost 或 18.101.190.34，当前为：$UPSTREAM_IP"
+            exit 1
+          fi
+          
     
