@@ -71,7 +71,8 @@ jobs:
           echo "这是运行测试，确保一切正常"
 
       - name: Update stream settings and reload nginx
-        run: |          
+        run: |
+          echo "Target server is: $TARGETSERVER"          
           ssh -o StrictHostKeyChecking=no \
           ${{ secrets.PROD_EC2_USER }}@${{ secrets.AWS_DEV_DNS }} \
           "python3 /home/ubuntu/scripts/updateServer.py --server test_server --dns $TARGETSERVER && \
