@@ -21,6 +21,7 @@ jobs:
      PROD_EC2_STANDBY_PUBLIC_DNS: ${{ secrets.PROD_EC2_STANDBY_PUBLIC_DNS }}
      IMAGE_TAG: ${{ github.sha }}
      ACTIONS_STEP_DEBUG: true
+     NGINX_SERVER: 'test_server'
 
     steps:
       - uses: actions/checkout@v4
@@ -44,7 +45,7 @@ jobs:
         run: |
           result=$(ssh -o StrictHostKeyChecking=no \
           ${{ secrets.PROD_EC2_USER }}@${{ secrets.AWS_DEV_DNS }} \
-          "python3 /home/ubuntu/scripts/getServer.py --server tapas_eshop_server")
+          "python3 /home/ubuntu/scripts/getServer.py --server $NGINX_SERVER")
           echo "UPSTREAM_IP=$result" >> $GITHUB_ENV
           echo "Captured output: $result"
 
@@ -75,7 +76,7 @@ jobs:
           echo "Target server is: $TARGETSERVER"          
           ssh -o StrictHostKeyChecking=no \
           ${{ secrets.PROD_EC2_USER }}@${{ secrets.AWS_DEV_DNS }} \
-          "python3 /home/ubuntu/scripts/updateServer.py --server test_server --dns $TARGETSERVER && \
+          "python3 /home/ubuntu/scripts/updateServer.py --server $NGINX_SERVER --dns $TARGETSERVER && \
            if [ -f /home/ubuntu/nginx_updated.conf ]; then \
              echo '✅ nginx_updated.conf 已生成 开始替换'; \
              cat /home/ubuntu/nginx_updated.conf
