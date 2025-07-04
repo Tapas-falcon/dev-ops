@@ -78,9 +78,10 @@ jobs:
           ${{ secrets.PROD_EC2_USER }}@${{ secrets.AWS_DEV_DNS }} \
           "python3 /home/ubuntu/scripts/updateServer.py --server $NGINX_SERVER --dns $TARGETSERVER && \
            pwd && \
+           ls && \           
            if [ -f nginx_updated.conf ]; then \
              echo '✅ nginx_updated.conf 已生成 开始替换'; \
-             cat /nginx_updated.conf
+             cat nginx_updated.conf
              sudo mv -f nginx_updated.conf /etc/nginx/conf.d/liao_pastel-upstream-serv.conf && \
              echo '✅ 配置文件已更新'; \
              sudo nginx -t && \
