@@ -53,10 +53,12 @@ jobs:
           echo "当前 upstream IP 是：$UPSTREAM_IP"
           if [[ "$UPSTREAM_IP" == "localhost" ]]; then
             echo "✅ 当前 upstream 指向 localhost"
-          elif [[ "$UPSTREAM_IP" == "18.101.190.34" ]]; then
-            echo "✅ 当前 upstream 指向 18.101.190.34"            
+            echo "TARGETSERVER=127.0.0.1" >> $GITHUB_ENV
+          elif [[ "$UPSTREAM_IP" == "127.0.0.1" ]]; then
+            echo "✅ 当前 upstream 指向 127.0.0.1"  
+            echo "TARGETSERVER=localhost" >> $GITHUB_ENV          
           else
-            echo "❌ 错误：upstream IP 不合法，必须是 localhost 或 18.101.190.34，当前为：$UPSTREAM_IP"
+            echo "❌ 错误：upstream IP 不合法，必须是 localhost 或 127.0.0.1，当前为：$UPSTREAM_IP"
             exit 1
           fi    
 
@@ -72,7 +74,7 @@ jobs:
         run: |          
           ssh -o StrictHostKeyChecking=no \
           ${{ secrets.PROD_EC2_USER }}@${{ secrets.AWS_DEV_DNS }} \
-          "python3 /home/ubuntu/scripts/updateServer.py --server test_server --dns 127.0.0.1 && \
+          "python3 /home/ubuntu/scripts/updateServer.py --server test_server --dns $TARGETSERVER && \
            pwd && \
            ls && \
            if [ -f /home/ubuntu/nginx_updated.conf ]; then \
