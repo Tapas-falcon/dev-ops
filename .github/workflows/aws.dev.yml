@@ -1,0 +1,93 @@
+name: Development Deploy
+
+on:
+  push:
+    branches:
+      - master # 你想部署的分支
+  workflow_dispatch:
+    inputs:
+      branch: 
+        description: 'Branch to build'
+        required: true
+        default: 'master'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+     PROD_EC2_USER: ${{ secrets.PROD_EC2_USER }}
+     PROD_EC2_PUBLIC_DNS: ${{ secrets.PROD_EC2_PUBLIC_DNS }}
+     PROD_EC2_STANDBY_PUBLIC_DNS: ${{ secrets.PROD_EC2_STANDBY_PUBLIC_DNS }}
+     IMAGE_TAG: ${{ github.sha }}
+     ACTIONS_STEP_DEBUG: true
+     NGINX_SERVER: 'test_server'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch || 'master' }}
+
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.AWS_DEV_SSH_KEY }}
+      
+      - name: backup nginx config file
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.PROD_EC2_USER }}@${{ secrets.AWS_DEV_DNS }} <<EOF
+          echo "Connected!"
+          sudo cp /etc/nginx/conf.d/liao_pastel-upstream-serv.conf /etc/nginx/conf.d/liao_pastel-upstream-serv.conf.bak
+          echo "📦 已创建备份文件：liao_pastel-upstream-serv.conf.bak"
+          EOF
+
+      - name: Get deployment target  
+        run: |
+          result=$(ssh -o StrictHostKeyChecking=no \
+          ${{ secrets.PROD_EC2_USER }}@${{ secrets.AWS_DEV_DNS }} \
+          "python3 /home/ubuntu/scripts/getServer.py --server $NGINX_SERVER")
+          echo "UPSTREAM_IP=$result" >> $GITHUB_ENV
+          echo "Captured output: $result"
+
+      - name: Show current upstream IP
+        run: |
+          echo "当前 upstream IP 是：$UPSTREAM_IP"
+          if [[ "$UPSTREAM_IP" == "localhost" ]]; then
+            echo "✅ 当前 upstream 指向 localhost"
+            echo "TARGETSERVER=127.0.0.1" >> $GITHUB_ENV
+          elif [[ "$UPSTREAM_IP" == "127.0.0.1" ]]; then
+            echo "✅ 当前 upstream 指向 127.0.0.1"  
+            echo "TARGETSERVER=localhost" >> $GITHUB_ENV          
+          else
+            echo "❌ 错误：upstream IP 不合法，必须是 localhost 或 127.0.0.1，当前为：$UPSTREAM_IP"
+            exit 1
+          fi    
+
+      - name: Deploy application into server
+        run: |
+          echo "这是部署应用到对应的server上"
+
+      - name: Run basic testing to make sure everything is working well
+        run: |
+          echo "这是运行测试，确保一切正常"
+
+      - name: Update stream settings and reload nginx
+        run: |          
+          echo "Target server is: $TARGETSERVER"          
+          ssh -o StrictHostKeyChecking=no \
+          ${{ secrets.PROD_EC2_USER }}@${{ secrets.AWS_DEV_DNS }} \
+          "python3 /home/ubuntu/scripts/updateServer.py --server $NGINX_SERVER --dns $TARGETSERVER && \
+           if [ -f nginx_updated.conf ]; then \
+             echo '✅ nginx_updated.conf 已生成 开始替换'; \
+             sudo mv -f nginx_updated.conf /etc/nginx/conf.d/liao_pastel-upstream-serv.conf && \
+             echo '✅ 配置文件已更新'; \
+             sudo nginx -t && \
+             sudo systemctl reload nginx && \
+             echo '✅ Nginx 配置已重载'; \
+           else \
+             echo '❌ Error: nginx_updated.conf 未生成'; \
+             exit 1; \
+           fi"
+
+
+    
